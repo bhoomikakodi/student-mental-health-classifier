@@ -8,6 +8,7 @@ F1, and MCC), confusion matrix heatmaps, ROC curves, and single-instance risk as
 """
 
 import os
+import hashlib
 import json
 import numpy as np
 import pandas as pd
@@ -150,6 +151,80 @@ st.markdown("""
         }
     }
     
+    /* Smooth transitions
+       - Fast reruns (< ~0.6s, e.g. switching between already-computed models):
+         no loader; the new content gets an enter animation (see end of file).
+       - Slow reruns (first SVM run) and CSV uploads (while the file is being
+         transferred AND while the script reruns on it): the stale content fades
+         out and an animated wave loader fades in; the new content fades back in.
+       Layout is never changed and the sidebar stays usable. */
+    [data-testid="stMain"] [data-testid="stTabs"] {
+        opacity: 1;
+        transition: opacity 0.5s ease-in-out;
+    }
+    [data-testid="stApp"]:is([data-test-script-state="running"], :has([data-testid="stFileChipIconSpinner"])) [data-testid="stMain"] [data-testid="stTabs"] {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.45s ease-in-out 0.6s;
+    }
+    [data-testid="stMainBlockContainer"] {
+        position: relative;
+    }
+    [data-testid="stApp"]:is([data-test-script-state="running"], :has([data-testid="stFileChipIconSpinner"])) [data-testid="stMain"] [data-testid="stMainBlockContainer"]::before,
+    [data-testid="stApp"]:is([data-test-script-state="running"], :has([data-testid="stFileChipIconSpinner"])) [data-testid="stMain"] [data-testid="stMainBlockContainer"]::after {
+        content: "";
+        position: absolute;
+        top: 13rem;
+        left: clamp(1rem, 3vw, 3rem);   /* align with the hero banner edges */
+        right: clamp(1rem, 3vw, 3rem);
+        height: 190px;
+        border-radius: 18px;
+        overflow: hidden;
+        pointer-events: none;
+        opacity: 0;
+        background-repeat: repeat-x;
+        background-size: 800px 100%;
+    }
+    /* Back wave (light blue) */
+    [data-testid="stApp"]:is([data-test-script-state="running"], :has([data-testid="stFileChipIconSpinner"])) [data-testid="stMain"] [data-testid="stMainBlockContainer"]::before {
+        height: 170px;
+        background-image: url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%27800%27%20height=%27200%27%20viewBox=%270%200%20800%20200%27%20preserveAspectRatio=%27none%27%3E%3Cpath%20fill=%27%2360a5d4%27%20d=%27M0%2C70%20Q100%2C10%20200%2C70%20T400%2C70%20T600%2C70%20T800%2C70%20V200%20H0%20Z%27/%3E%3C/svg%3E");
+        animation: loader-fade-in 0.5s ease 0.6s forwards,
+                   wave-slide-right 7s linear infinite,
+                   wave-bob 2.6s ease-in-out infinite alternate;
+    }
+    /* Front wave (purple) with label */
+    [data-testid="stApp"]:is([data-test-script-state="running"], :has([data-testid="stFileChipIconSpinner"])) [data-testid="stMain"] [data-testid="stMainBlockContainer"]::after {
+        content: "Crunching the numbers...";
+        box-sizing: border-box;
+        padding-top: 128px;
+        text-align: center;
+        font-size: 1rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        color: #ffffff;
+        background-image: url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%27800%27%20height=%27200%27%20viewBox=%270%200%20800%20200%27%20preserveAspectRatio=%27none%27%3E%3Cpath%20fill=%27%236d4fc9%27%20d=%27M0%2C95%20Q66.67%2C50%20133.33%2C95%20T266.67%2C95%20T400%2C95%20T533.33%2C95%20T666.67%2C95%20T800%2C95%20V200%20H0%20Z%27/%3E%3C/svg%3E");
+        animation: loader-fade-in 0.5s ease 0.6s forwards,
+                   wave-slide-left 4.5s linear infinite,
+                   wave-bob 3.4s ease-in-out infinite alternate-reverse;
+    }
+    @keyframes loader-fade-in {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
+    @keyframes wave-slide-right {
+        from { background-position-x: 0; }
+        to   { background-position-x: 800px; }
+    }
+    @keyframes wave-slide-left {
+        from { background-position-x: 0; }
+        to   { background-position-x: -800px; }
+    }
+    @keyframes wave-bob {
+        from { transform: translateY(-6px); }
+        to   { transform: translateY(6px); }
+    }
+
     /* Footer text */
     .footer-text {
         text-align: center;
@@ -208,6 +283,34 @@ def load_default_test_data():
     return None
 
 
+@st.cache_data(show_spinner=False)
+def get_predictions(model_name, _model, X_proc):
+    """Cached predicted labels and probability scores per (model, dataset).
+
+    Keeps reruns fast (e.g. SVM takes ~2s) so stale widgets from the previous
+    selection don't linger on screen while switching models.
+    """
+    preds = _model.predict(X_proc)
+    if hasattr(_model, "predict_proba"):
+        probs = _model.predict_proba(X_proc)[:, 1]
+    elif hasattr(_model, "decision_function"):
+        probs = 1 / (1 + np.exp(-_model.decision_function(X_proc)))
+    else:
+        probs = preds
+    return preds, probs
+
+
+@st.cache_data(show_spinner=False)
+def read_dataset_bytes(file_name):
+    """Raw bytes of a CSV in Datasets/ for the sidebar download buttons (None if missing)."""
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(base_dir, "Datasets", file_name)
+    if os.path.exists(path):
+        with open(path, "rb") as f:
+            return f.read()
+    return None
+
+
 preprocessor, metadata, models, metrics_summary_df = load_model_artifacts()
 default_test_df = load_default_test_data()
 
@@ -254,8 +357,28 @@ with st.sidebar:
     )
     
     st.markdown("---")
-    st.caption("M.Tech (AIML) - Machine Learning Assignment 2")
+
+    # 3. Dataset Downloads
+    st.subheader("3. Download Datasets")
+    for _label, _file_name in [
+        ("⬇️ Test Data (test_data.csv)", "test_data.csv"),
+        ("⬇️ Full Dataset (.csv)", "Student_Depression_Dataset.csv"),
+    ]:
+        _data = read_dataset_bytes(_file_name)
+        if _data is not None:
+            st.download_button(
+                _label,
+                data=_data,
+                file_name=_file_name,
+                mime="text/csv",
+                use_container_width=True,
+                help=f"Download {_file_name}",
+                key=f"download_{_file_name}",
+            )
+
+    st.markdown("---")
     st.caption("Student Depression Risk Assessment System")
+    st.caption("© 2026 Bhoomika K G")
 
 
 # ---------------------------------------------------------
@@ -319,160 +442,177 @@ tab_eval, tab_compare, tab_data, tab_predict = st.tabs([
 # =========================================================
 with tab_eval:
     if selected_option == "Compare All 5 Models":
-        st.info("💡 You have selected **'Compare All 5 Models'**. Switch to the **'Multi-Model Comparison'** tab to view comparative charts, or select an individual model in the sidebar.")
-        model_to_display = "Logistic Regression"
+        st.info("💡 You have selected **'Compare All 5 Models'**. Confusion matrices of all models are shown below. Switch to the **'Multi-Model Comparison'** tab for comparative charts, or select an individual model in the sidebar for detailed metrics and ROC curve.")
+        st.markdown("### 🧩 Confusion Matrices: All 5 Models")
+        st.caption(f"Evaluated on **{len(active_df):,} test samples** from *{data_source_name}* (Inference-only mode).")
+
+        cm_labels = ["No Depression (0)", "Depression (1)"]
+        model_items = list(models.items())
+        for row_start in range(0, len(model_items), 2):
+            cm_cols = st.columns(2)
+            for col, (m_name, mdl) in zip(cm_cols, model_items[row_start:row_start + 2]):
+                with col:
+                    cm_all = confusion_matrix(y_active, get_predictions(m_name, mdl, X_active_proc)[0])
+                    fig_cm_all = px.imshow(
+                        cm_all,
+                        text_auto=True,
+                        x=cm_labels,
+                        y=cm_labels,
+                        labels=dict(x="Predicted Class", y="Actual Class", color="Count"),
+                        color_continuous_scale="Blues",
+                        title=f"Confusion Matrix ({m_name})"
+                    )
+                    fig_cm_all.update_layout(
+                        height=380,
+                        paper_bgcolor="rgba(0,0,0,0)",
+                        plot_bgcolor="rgba(0,0,0,0)",
+                        margin=dict(l=40, r=40, t=50, b=40),
+                        font=dict(family="sans-serif")
+                    )
+                    st.plotly_chart(fig_cm_all, use_container_width=True)
     else:
         model_to_display = selected_option
+        st.markdown(f"### 📊 Performance Metrics: {model_to_display}")
+        st.caption(f"Evaluated on **{len(active_df):,} test samples** from *{data_source_name}* (Inference-only mode).")
 
-    st.markdown(f"### 📊 Performance Metrics: {model_to_display}")
-    st.caption(f"Evaluated on **{len(active_df):,} test samples** from *{data_source_name}* (Inference-only mode).")
+        # Predict using selected pre-trained model (cached)
+        current_model = models[model_to_display]
+        y_pred, y_prob = get_predictions(model_to_display, current_model, X_active_proc)
 
-    # Predict using selected pre-trained model
-    current_model = models[model_to_display]
-    y_pred = current_model.predict(X_active_proc)
+        # Compute 6 required metrics
+        acc = accuracy_score(y_active, y_pred)
+        auc_val = roc_auc_score(y_active, y_prob)
+        prec = precision_score(y_active, y_pred, zero_division=0)
+        rec = recall_score(y_active, y_pred, zero_division=0)
+        f1 = f1_score(y_active, y_pred, zero_division=0)
+        mcc = matthews_corrcoef(y_active, y_pred)
+
+        # Display 6 Metric Cards in 2 Responsive Rows
+        row1_c1, row1_c2, row1_c3 = st.columns(3)
     
-    if hasattr(current_model, "predict_proba"):
-        y_prob = current_model.predict_proba(X_active_proc)[:, 1]
-    elif hasattr(current_model, "decision_function"):
-        decision = current_model.decision_function(X_active_proc)
-        y_prob = 1 / (1 + np.exp(-decision))
-    else:
-        y_prob = y_pred
-
-    # Compute 6 required metrics
-    acc = accuracy_score(y_active, y_pred)
-    auc_val = roc_auc_score(y_active, y_prob)
-    prec = precision_score(y_active, y_pred, zero_division=0)
-    rec = recall_score(y_active, y_pred, zero_division=0)
-    f1 = f1_score(y_active, y_pred, zero_division=0)
-    mcc = matthews_corrcoef(y_active, y_pred)
-
-    # Display 6 Metric Cards in 2 Responsive Rows
-    row1_c1, row1_c2, row1_c3 = st.columns(3)
-    
-    with row1_c1:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-title">Accuracy</div>
-            <div class="metric-value">{acc:.2%}</div>
-            <span class="metric-badge badge-green">Overall Match</span>
-        </div>
-        """, unsafe_allow_html=True)
+        with row1_c1:
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-title">Accuracy</div>
+                <div class="metric-value">{acc:.2%}</div>
+                <span class="metric-badge badge-green">Overall Match</span>
+            </div>
+            """, unsafe_allow_html=True)
         
-    with row1_c2:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-title">ROC-AUC Score</div>
-            <div class="metric-value">{auc_val:.4f}</div>
-            <span class="metric-badge badge-blue">Separability</span>
-        </div>
-        """, unsafe_allow_html=True)
+        with row1_c2:
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-title">ROC-AUC Score</div>
+                <div class="metric-value">{auc_val:.4f}</div>
+                <span class="metric-badge badge-blue">Separability</span>
+            </div>
+            """, unsafe_allow_html=True)
         
-    with row1_c3:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-title">Precision</div>
-            <div class="metric-value">{prec:.2%}</div>
-            <span class="metric-badge badge-purple">Positive Quality</span>
-        </div>
-        """, unsafe_allow_html=True)
+        with row1_c3:
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-title">Precision</div>
+                <div class="metric-value">{prec:.2%}</div>
+                <span class="metric-badge badge-purple">Positive Quality</span>
+            </div>
+            """, unsafe_allow_html=True)
 
-    row2_c1, row2_c2, row2_c3 = st.columns(3)
+        row2_c1, row2_c2, row2_c3 = st.columns(3)
         
-    with row2_c1:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-title">Recall (Sensitivity)</div>
-            <div class="metric-value">{rec:.2%}</div>
-            <span class="metric-badge badge-green">True Positive Rate</span>
-        </div>
-        """, unsafe_allow_html=True)
+        with row2_c1:
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-title">Recall (Sensitivity)</div>
+                <div class="metric-value">{rec:.2%}</div>
+                <span class="metric-badge badge-green">True Positive Rate</span>
+            </div>
+            """, unsafe_allow_html=True)
         
-    with row2_c2:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-title">F1 Score</div>
-            <div class="metric-value">{f1:.4f}</div>
-            <span class="metric-badge badge-blue">Harmonic Mean</span>
-        </div>
-        """, unsafe_allow_html=True)
+        with row2_c2:
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-title">F1 Score</div>
+                <div class="metric-value">{f1:.4f}</div>
+                <span class="metric-badge badge-blue">Harmonic Mean</span>
+            </div>
+            """, unsafe_allow_html=True)
         
-    with row2_c3:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-title">MCC Score</div>
-            <div class="metric-value">{mcc:.4f}</div>
-            <span class="metric-badge badge-purple">Correlation</span>
-        </div>
-        """, unsafe_allow_html=True)
+        with row2_c3:
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-title">MCC Score</div>
+                <div class="metric-value">{mcc:.4f}</div>
+                <span class="metric-badge badge-purple">Correlation</span>
+            </div>
+            """, unsafe_allow_html=True)
 
-    st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("<br>", unsafe_allow_html=True)
 
-    # Visualizations: Confusion Matrix and ROC Curve Side-by-Side
-    col_viz1, col_viz2 = st.columns(2)
+        # Visualizations: Confusion Matrix and ROC Curve Side-by-Side
+        col_viz1, col_viz2 = st.columns(2)
 
-    with col_viz1:
-        st.subheader("Confusion Matrix")
-        cm = confusion_matrix(y_active, y_pred)
-        cm_labels = ["No Depression (0)", "Depression (1)"]
+        with col_viz1:
+            st.subheader("Confusion Matrix")
+            cm = confusion_matrix(y_active, y_pred)
+            cm_labels = ["No Depression (0)", "Depression (1)"]
         
-        fig_cm = px.imshow(
-            cm,
-            text_auto=True,
-            x=cm_labels,
-            y=cm_labels,
-            labels=dict(x="Predicted Class", y="Actual Class", color="Count"),
-            color_continuous_scale="Blues",
-            title=f"Confusion Matrix ({model_to_display})"
+            fig_cm = px.imshow(
+                cm,
+                text_auto=True,
+                x=cm_labels,
+                y=cm_labels,
+                labels=dict(x="Predicted Class", y="Actual Class", color="Count"),
+                color_continuous_scale="Blues",
+                title=f"Confusion Matrix ({model_to_display})"
+            )
+            fig_cm.update_layout(
+                width=480,
+                height=380,
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                margin=dict(l=40, r=40, t=50, b=40),
+                font=dict(family="sans-serif")
+            )
+            st.plotly_chart(fig_cm, use_container_width=True)
+
+        with col_viz2:
+            st.subheader("ROC Curve")
+            fpr, tpr, _ = roc_curve(y_active, y_prob)
+        
+            fig_roc = go.Figure()
+            fig_roc.add_trace(go.Scatter(
+                x=fpr, y=tpr,
+                mode='lines',
+                name=f'{model_to_display} (AUC = {auc_val:.4f})',
+                line=dict(color='#2563eb', width=3)
+            ))
+            fig_roc.add_trace(go.Scatter(
+                x=[0, 1], y=[0, 1],
+                mode='lines',
+                name='Random Chance (AUC = 0.50)',
+                line=dict(color='#94a3b8', dash='dash')
+            ))
+            fig_roc.update_layout(
+                title=f"ROC Curve ({model_to_display})",
+                xaxis_title="False Positive Rate (1 - Specificity)",
+                yaxis_title="True Positive Rate (Sensitivity)",
+                width=480,
+                height=380,
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                margin=dict(l=40, r=40, t=50, b=40),
+                legend=dict(x=0.45, y=0.1)
+            )
+            st.plotly_chart(fig_roc, use_container_width=True)
+
+        # Classification Report
+        st.subheader("Classification Report")
+        report_dict = classification_report(y_active, y_pred, target_names=["No Depression (0)", "Depression (1)"], output_dict=True)
+        report_df = pd.DataFrame(report_dict).transpose()
+        st.dataframe(
+            report_df.style.format(precision=4).background_gradient(cmap="Blues", subset=["precision", "recall", "f1-score"]),
+            use_container_width=True
         )
-        fig_cm.update_layout(
-            width=480,
-            height=380,
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            margin=dict(l=40, r=40, t=50, b=40),
-            font=dict(family="sans-serif")
-        )
-        st.plotly_chart(fig_cm, use_container_width=True)
-
-    with col_viz2:
-        st.subheader("ROC Curve")
-        fpr, tpr, _ = roc_curve(y_active, y_prob)
-        
-        fig_roc = go.Figure()
-        fig_roc.add_trace(go.Scatter(
-            x=fpr, y=tpr,
-            mode='lines',
-            name=f'{model_to_display} (AUC = {auc_val:.4f})',
-            line=dict(color='#2563eb', width=3)
-        ))
-        fig_roc.add_trace(go.Scatter(
-            x=[0, 1], y=[0, 1],
-            mode='lines',
-            name='Random Chance (AUC = 0.50)',
-            line=dict(color='#94a3b8', dash='dash')
-        ))
-        fig_roc.update_layout(
-            title=f"ROC Curve ({model_to_display})",
-            xaxis_title="False Positive Rate (1 - Specificity)",
-            yaxis_title="True Positive Rate (Sensitivity)",
-            width=480,
-            height=380,
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            margin=dict(l=40, r=40, t=50, b=40),
-            legend=dict(x=0.45, y=0.1)
-        )
-        st.plotly_chart(fig_roc, use_container_width=True)
-
-    # Classification Report
-    st.subheader("Classification Report")
-    report_dict = classification_report(y_active, y_pred, target_names=["No Depression (0)", "Depression (1)"], output_dict=True)
-    report_df = pd.DataFrame(report_dict).transpose()
-    st.dataframe(
-        report_df.style.format(precision=4).background_gradient(cmap="Blues", subset=["precision", "recall", "f1-score"]),
-        use_container_width=True
-    )
 
 
 # =========================================================
@@ -486,14 +626,7 @@ with tab_compare:
     roc_curves_data = {}
     
     for m_name, mdl in models.items():
-        preds = mdl.predict(X_active_proc)
-        if hasattr(mdl, "predict_proba"):
-            probs = mdl.predict_proba(X_active_proc)[:, 1]
-        elif hasattr(mdl, "decision_function"):
-            dfunc = mdl.decision_function(X_active_proc)
-            probs = 1 / (1 + np.exp(-dfunc))
-        else:
-            probs = preds
+        preds, probs = get_predictions(m_name, mdl, X_active_proc)
 
         c_acc = accuracy_score(y_active, preds)
         c_auc = roc_auc_score(y_active, probs)
@@ -772,3 +905,23 @@ st.markdown("""
     Built with Streamlit & Scikit-Learn
 </div>
 """, unsafe_allow_html=True)
+
+
+# ---------------------------------------------------------
+# Smooth enter animation: runs at the end of every script run. The keyframe name
+# changes whenever the model/dataset changes, which restarts the CSS animation on
+# the tab panels so the new content fades in instead of snapping into place.
+# ---------------------------------------------------------
+_anim_id = hashlib.md5(f"{selected_option}|{data_source_name}".encode()).hexdigest()[:8]
+st.markdown(
+    f"""
+    <style>
+    [data-testid="stTabPanel"] {{ animation: tab-enter-{_anim_id} 0.6s ease-out; }}
+    @keyframes tab-enter-{_anim_id} {{
+        from {{ opacity: 0.35; transform: translateY(10px); }}
+        to   {{ opacity: 1;    transform: none; }}
+    }}
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
