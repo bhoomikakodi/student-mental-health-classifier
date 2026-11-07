@@ -15,7 +15,7 @@ The objective of this project is to develop and systematically evaluate **five s
 
 ---
 
-## 2. Dataset Description `[1 Mark]`
+## 2. Dataset Description 
 
 - **Overview:** Survey records of students covering demographic, academic, lifestyle and psychological attributes, labelled with whether the student is at risk of depression. It is a **binary classification** problem.
 - **Dataset Name:** Student Depression Dataset (`Datasets/Student_Depression_Dataset.csv`)
@@ -52,7 +52,7 @@ The objective of this project is to develop and systematically evaluate **five s
 
 ---
 
-## 3. GitHub Repository Link `[1 Mark]`
+## 3. GitHub Repository Link 
 
 - **GitHub Repository URL:** [https://github.com/bhoomikakodi/student-mental-health-classifier](https://github.com/bhoomikakodi/student-mental-health-classifier)
 - **Live Streamlit Cloud URL:** `https://student-depression-ml-assignment2.streamlit.app`
@@ -61,7 +61,7 @@ The objective of this project is to develop and systematically evaluate **five s
 
 ---
 
-## 4. Models Used & Performance Comparison Table `[5 Marks]`
+## 4. Models Used & Performance Comparison Table 
 
 All 5 classifiers were evaluated on the identical unseen test set (**5,581 stratified test instances**, 20% holdout split) across all six mandatory evaluation metrics (KNN = K-Nearest Neighbors, Naive Bayes = Gaussian NB):
 
@@ -75,7 +75,7 @@ All 5 classifiers were evaluated on the identical unseen test set (**5,581 strat
 
 ---
 
-## 5. Observations on Model Performance `[3 Marks]`
+## 5. Observations on Model Performance 
 
 | ML Model Name | Observation about model performance |
 | :--- | :--- |
