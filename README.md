@@ -140,7 +140,6 @@ student-mental-health-classifier/
 ├── run.sh                      # One-step setup & launch (macOS/Linux/Git Bash/WSL)
 ├── run.bat                     # One-step setup & launch (Windows cmd/PowerShell)
 ├── README.md                   # Full assignment documentation & analysis
-├── Assignment2.md              # Assignment specification & marking rubric
 │
 ├── Datasets/
 │   ├── Student_Depression_Dataset.csv   # Original dataset (27,901 rows)
@@ -158,7 +157,7 @@ student-mental-health-classifier/
 │   └── detailed_results.json   # Full confusion matrices & classification reports
 │
 ├── notebooks/
-│   └── student_depression_analysis.ipynb # End-to-end training notebook for BITS Lab
+│   └── student_depression_analysis.ipynb # End-to-end training notebook
 │
 └── src/
     └── train.py                # Standalone training & evaluation pipeline script
