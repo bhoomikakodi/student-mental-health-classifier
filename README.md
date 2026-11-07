@@ -55,9 +55,8 @@ The objective of this project is to develop and systematically evaluate **five s
 ## 3. GitHub Repository Link 
 
 - **GitHub Repository URL:** [https://github.com/bhoomikakodi/student-mental-health-classifier](https://github.com/bhoomikakodi/student-mental-health-classifier)
-- **Live Streamlit Cloud URL:** `https://student-mental-health-classifier-app.streamlit.app`
+- **Live Streamlit Cloud URL:** [https://student-mental-health-classifier-app.streamlit.app](https://student-mental-health-classifier-app.streamlit.app)
 
-*(Note: Replace placeholders with your final published repository and app URLs before creating your submission PDF).*
 
 ---
 
