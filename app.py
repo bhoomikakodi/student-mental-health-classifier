@@ -200,15 +200,11 @@ def load_model_artifacts():
 
 @st.cache_data
 def load_default_test_data():
-    """Load default pre-split test dataset from Datasets/ or root directory."""
+    """Load default pre-split test dataset from Datasets/."""
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    candidates = [
-        os.path.join(base_dir, "Datasets", "test_data.csv"),
-        os.path.join(base_dir, "test_data.csv")
-    ]
-    for path in candidates:
-        if os.path.exists(path):
-            return pd.read_csv(path)
+    path = os.path.join(base_dir, "Datasets", "test_data.csv")
+    if os.path.exists(path):
+        return pd.read_csv(path)
     return None
 
 

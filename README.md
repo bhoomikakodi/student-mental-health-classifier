@@ -52,7 +52,7 @@ The objective of this project is to develop and systematically evaluate **five s
 
 ## 3. GitHub Repository Link `[1 Mark]`
 
-- **GitHub Repository URL:** `https://github.com/<your-username>/student-depression-ml-assignment2`
+- **GitHub Repository URL:** [https://github.com/bhoomikakodi/student-mental-health-classifier](https://github.com/bhoomikakodi/student-mental-health-classifier)
 - **Live Streamlit Cloud URL:** `https://student-depression-ml-assignment2.streamlit.app`
 
 *(Note: Replace placeholders with your final published repository and app URLs before creating your submission PDF).*
@@ -97,12 +97,13 @@ All 5 classifiers were evaluated on the identical unseen test set (**5,581 strat
 ## 6. Repository Structure
 
 ```text
-student-depression-ml-assignment2/
+student-mental-health-classifier/
 │
 ├── app.py                      # Interactive Streamlit Web Application
 ├── requirements.txt            # Reproducible python dependencies
+├── run.sh                      # One-step setup & launch (macOS/Linux/Git Bash/WSL)
+├── run.bat                     # One-step setup & launch (Windows cmd/PowerShell)
 ├── README.md                   # Full assignment documentation & analysis
-├── test_data.csv               # 5,581 sample holdout test set with ground truth
 ├── Assignment2.md              # Assignment specification & marking rubric
 │
 ├── Datasets/
@@ -132,7 +133,7 @@ student-depression-ml-assignment2/
 ## 7. Streamlit Web Application Features
 
 The deployed Streamlit application includes all mandatory and bonus features:
-- **a. Test Dataset Upload (CSV):** Allows users to upload their own test CSV or defaults to the included `test_data.csv` (5,581 samples).
+- **a. Test Dataset Upload (CSV):** Allows users to upload their own test CSV or defaults to the included `Datasets/test_data.csv` (5,581 samples).
 - **b. Model Selection Dropdown:** Seamless switching between all 5 classifiers or a consolidated "Compare All 5 Models" mode.
 - **c. Evaluation Metrics Dashboard:** Displays Accuracy, ROC-AUC, Precision, Recall, F1, and MCC via modern KPI cards.
 - **d. Visual Confusion Matrix & ROC Curves:** Interactive Plotly heatmaps and combined ROC curves.
@@ -146,15 +147,17 @@ The deployed Streamlit application includes all mandatory and bonus features:
 ### A. Local Setup & Training
 ```bash
 # 1. Clone repository
-git clone https://github.com/<your-username>/student-depression-ml-assignment2.git
-cd student-depression-ml-assignment2
+git clone https://github.com/bhoomikakodi/student-mental-health-classifier.git
+cd student-mental-health-classifier
 
 # 2. Create virtual environment
 python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # On Windows (cmd): venv\Scripts\activate | PowerShell: venv\Scripts\Activate.ps1
 
-# 3. Install dependencies
+# 3. Install dependencies (always install from requirements.txt inside the venv)
 pip install -r requirements.txt
+#    (Notebook users: register the venv as a kernel and select it in Jupyter/VS Code)
+#    pip install ipykernel && python -m ipykernel install --user --name student-mental-health-venv
 
 # 4. Train all models and export artifacts
 python src/train.py
@@ -162,6 +165,12 @@ python src/train.py
 # 5. Launch interactive Streamlit application
 streamlit run app.py
 ```
+
+**One-step alternative:** run all of steps 2–5 above with a helper script from the project root. Each script creates the `venv` (if missing), activates it, installs `requirements.txt`, registers the Jupyter kernel, trains the models and launches the app:
+- **macOS / Linux / Git Bash / WSL:** `./run.sh` (auto-detects `venv/bin/activate` or `venv/Scripts/activate`)
+- **Windows `cmd` / PowerShell:** `run.bat` (uses `venv\Scripts\activate`; in PowerShell use `.\run.bat`)
+
+**Running the notebook:** open `notebooks/student_depression_analysis.ipynb` and select the **Python (student-mental-health venv)** kernel (or `venv/bin/python`). Its first cell runs `%pip install -r ../requirements.txt` inside that venv.
 
 ### B. Deployment to Streamlit Community Cloud
 1. Push this repository to GitHub.
@@ -178,5 +187,5 @@ streamlit run app.py
 - [x] All 5 classification algorithms trained, saved, and evaluated.
 - [x] All 6 evaluation metrics computed and compared (Accuracy, AUC, Precision, Recall, F1, MCC).
 - [x] Streamlit app (`app.py`) loads models without retraining and supports test CSV upload.
-- [x] Clean folder structure with `model/`, `test_data.csv`, `requirements.txt`, `src/`, `notebooks/`.
+- [x] Clean folder structure with `model/`, `Datasets/`, `requirements.txt`, `src/`, `notebooks/`.
 - [x] Markdown documentation and comparison tables strictly follow grading guidelines.

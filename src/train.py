@@ -104,12 +104,10 @@ def train_and_evaluate():
         X, y, test_size=0.2, random_state=42, stratify=y
     )
 
-    # Export test_data.csv to Datasets/ and project root for flexible access
+    # Export test_data.csv to Datasets/
     test_df = pd.concat([X_test, y_test], axis=1)
     datasets_test_path = os.path.join(base_dir, "Datasets", "test_data.csv")
-    root_test_path = os.path.join(base_dir, "test_data.csv")
     test_df.to_csv(datasets_test_path, index=False)
-    test_df.to_csv(root_test_path, index=False)
     logging.info(f"Saved test dataset to {datasets_test_path} with {len(test_df)} rows.")
 
     # 3. Fit Preprocessing Pipeline
