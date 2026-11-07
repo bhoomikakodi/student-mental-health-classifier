@@ -725,12 +725,12 @@ with tab_compare:
         {"ML Model Name": "Logistic Regression", "Observation": "Strong linear baseline with highest ROC-AUC (0.9184) and balanced Precision (85.76%) and Recall (87.88%). Highly efficient and well-calibrated."},
         {"ML Model Name": "Support Vector Machine (SVM)", "Observation": "Top-tier accuracy (84.38%) and MCC (0.6766). Effectively constructs a non-linear hyper-plane separating healthy vs at-risk students."},
         {"ML Model Name": "K-Nearest Neighbors (KNN)", "Observation": "High recall (89.84%) and AUC (0.9030), successfully clustering students with similar stress, sleep, and academic profiles."},
-        {"ML Model Name": "Decision Tree", "Observation": "Interpretable tree structure capturing hierarchical thresholds (e.g., Academic Pressure > 3.5 & Suicidal Thoughts). Solid F1 of 85.78%."},
+        {"ML Model Name": "Decision Tree", "Observation": "Interpretable tree structure whose top-level splits are suicidal thoughts, then Academic Pressure and Financial Stress. Solid F1 of 85.78%."},
         {"ML Model Name": "Naive Bayes", "Observation": "Achieves highest sensitivity/recall (97.92%) with AUC of 0.9118. However, lower precision (72.91%) due to conditional independence assumption across correlated pressure features."}
     ]
     st.table(pd.DataFrame(obs_data))
 
-    st.success("🏆 **Overall Winner: Support Vector Machine (SVM) / Logistic Regression** — Both models achieve the highest generalizable accuracy (~84.4%), ROC-AUC (> 0.915), and MCC (0.677), delivering optimal balance between precision and sensitivity for mental health risk screening.")
+    st.success("🏆 **Overall Winner: Support Vector Machine (SVM)** — Best on 3 of the 6 metrics: MCC (0.6766), Accuracy (84.38%) and F1 (0.8684), with a balanced Precision (85.68%) and Recall (88.04%) that suits mental health risk screening. Logistic Regression is a very close runner-up (MCC 0.6764, best ROC-AUC 0.9184), within 0.3 percentage points on every metric.")
 
 
 # =========================================================

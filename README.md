@@ -88,12 +88,14 @@ All 5 classifiers were evaluated on the identical unseen test set (**5,581 strat
 
 ## 6. Overall Winner for Your Dataset
 
-> **🏆 Winner: Support Vector Machine (SVM) / Logistic Regression**
-> 
+> **🏆 Winner: Support Vector Machine (SVM)**
+>
 > **Justification:**
-> 1. **Highest MCC (0.6766) and Accuracy (84.38%):** Matthews Correlation Coefficient is the most robust metric for binary classification as it evaluates all four quadrants of the confusion matrix (TP, TN, FP, FN). SVM leads all models with an MCC of 0.6766.
-> 2. **Optimal Precision-Recall Balance:** In mental health screening, both false alarms (low precision) and missed diagnoses (low recall) carry clinical costs. SVM provides an ideal equilibrium with **85.68% Precision** and **88.04% Recall** ($F_1 = 0.8684$).
-> 3. **High Discriminative Power:** With a ROC-AUC of **0.9157** (and Logistic Regression at **0.9184**), both models exhibit exceptional class separability across varying decision thresholds.
+> 1. **Best on 3 of the 6 metrics, including MCC:** SVM leads all five models on **MCC (0.6766)**, **Accuracy (84.38%)** and **F1 (0.8684)**. Matthews Correlation Coefficient is the most robust single metric for binary classification, as it uses all four quadrants of the confusion matrix (TP, TN, FP, FN).
+> 2. **Optimal Precision-Recall Balance:** In mental health screening, both false alarms (low precision) and missed diagnoses (low recall) carry clinical costs. SVM provides an ideal equilibrium with **85.68% Precision** and **88.04% Recall**. Naive Bayes has higher recall (97.92%) but pays for it with the lowest precision (72.91%) and lowest MCC (0.5591).
+> 3. **High Discriminative Power:** SVM's ROC-AUC of **0.9157** shows exceptional class separability across decision thresholds.
+>
+> **Runner-up:** Logistic Regression is a very close second (MCC 0.6764, Accuracy 84.36%) and leads on ROC-AUC (0.9184) and Precision (85.76%). The gap to SVM is at most 0.3 percentage points on any metric, so it is a strong, simpler and faster alternative, but SVM is ahead on the majority of metrics and on MCC, so SVM is declared the overall best model.
 
 ---
 
