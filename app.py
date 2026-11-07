@@ -35,7 +35,7 @@ from sklearn.metrics import (
 # Page Configuration & Styling
 # ---------------------------------------------------------
 st.set_page_config(
-    page_title="Student Depression Risk Classifier | BITS Assignment 2",
+    page_title="Student Depression Risk Classifier",
     page_icon="🧠",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -901,7 +901,7 @@ with tab_predict:
 # ---------------------------------------------------------
 st.markdown("""
 <div class="footer-text">
-    BITS Pilani — Work Integrated Learning Programmes Division | M.Tech (AIML) Machine Learning Assignment 2<br>
+    © 2026 Bhoomika K G<br>
     Built with Streamlit & Scikit-Learn
 </div>
 """, unsafe_allow_html=True)
