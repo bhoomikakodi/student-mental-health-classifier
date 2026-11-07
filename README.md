@@ -55,7 +55,7 @@ The objective of this project is to develop and systematically evaluate **five s
 ## 3. GitHub Repository Link 
 
 - **GitHub Repository URL:** [https://github.com/bhoomikakodi/student-mental-health-classifier](https://github.com/bhoomikakodi/student-mental-health-classifier)
-- **Live Streamlit Cloud URL:** `https://student-depression-ml-assignment2.streamlit.app`
+- **Live Streamlit Cloud URL:** `https://student-mental-health-classifier-app.streamlit.app`
 
 *(Note: Replace placeholders with your final published repository and app URLs before creating your submission PDF).*
 
@@ -75,7 +75,7 @@ All 5 classifiers were evaluated on the identical unseen test set (**5,581 strat
 
 ---
 
-## 5. Observations on Model Performance 
+## 5. Observations on Model Performance `[3 Marks]`
 
 | ML Model Name | Observation about model performance |
 | :--- | :--- |
@@ -127,13 +127,6 @@ streamlit run app.py
 - **Windows `cmd` / PowerShell:** `run.bat` (uses `venv\Scripts\activate`; in PowerShell use `.\run.bat`)
 
 **Running the notebook:** open `notebooks/student_depression_analysis.ipynb` and select the **Python (student-mental-health venv)** kernel (or `venv/bin/python`). Its first cell runs `%pip install -r ../requirements.txt` inside that venv.
-
-### B. Deployment to Streamlit Community Cloud
-1. Push this repository to GitHub.
-2. Navigate to [share.streamlit.io](https://share.streamlit.io).
-3. Connect your GitHub account and click **"New App"**.
-4. Select the repository, set branch to `main`, and main file path to `app.py`.
-5. Click **Deploy**.
 
 ---
 
