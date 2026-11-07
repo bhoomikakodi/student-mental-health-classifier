@@ -1,0 +1,41 @@
+{
+  "target_col": "Depression",
+  "num_cols": [
+    "Age",
+    "Academic Pressure",
+    "Work Pressure",
+    "CGPA",
+    "Study Satisfaction",
+    "Job Satisfaction",
+    "Work/Study Hours",
+    "Financial Stress"
+  ],
+  "cat_cols": [
+    "Gender",
+    "City",
+    "Profession",
+    "Sleep Duration",
+    "Dietary Habits",
+    "Degree",
+    "Have you ever had suicidal thoughts ?",
+    "Family History of Mental Illness"
+  ],
+  "feature_names": [
+    "Gender",
+    "Age",
+    "City",
+    "Profession",
+    "Academic Pressure",
+    "Work Pressure",
+    "CGPA",
+    "Study Satisfaction",
+    "Job Satisfaction",
+    "Sleep Duration",
+    "Dietary Habits",
+    "Degree",
+    "Have you ever had suicidal thoughts ?",
+    "Work/Study Hours",
+    "Financial Stress",
+    "Family History of Mental Illness"
+  ]
+}

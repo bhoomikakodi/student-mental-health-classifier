@@ -1,8 +1,8 @@
 # Student Depression Risk Classification & Comparative ML Study
 
-**BITS Pilani — Work Integrated Learning Programmes Division**  
-**M.Tech (AIML) — Machine Learning Assignment 2**  
-**Course Code / Semester:** Machine Learning (Assignment - 2)  
+**BITS ID**  2026AJ05539
+**Student Name**   BHOOMIKA K G
+**Course Code:** AIMLZG565 
 **Deployment Platform:** Streamlit Community Cloud  
 
 ---
@@ -15,10 +15,12 @@ The objective of this project is to develop and systematically evaluate **five s
 
 ---
 
-## 2. Dataset Description `[1 Mark]`
+## 2. Dataset Description 
 
-- **Dataset Name:** Student Depression Dataset
+- **Overview:** Survey records of students covering demographic, academic, lifestyle and psychological attributes, labelled with whether the student is at risk of depression. It is a **binary classification** problem.
+- **Dataset Name:** Student Depression Dataset (`Datasets/Student_Depression_Dataset.csv`)
 - **Source:** [Kaggle — Student Depression Dataset](https://www.kaggle.com/) / UCI-style Survey Records
+- **Shape:** 27,901 rows × 18 columns in the raw file; after dropping the `id` column, **27,901 rows × 17 columns** (16 predictors + 1 target)
 - **Total Instances:** 27,901 rows ($\ge 500$ criteria satisfied)
 - **Total Features:** 16 predictor features + 1 target variable ($\ge 12$ criteria satisfied)
 - **Target Variable:** `Depression` (Binary: `0` = No Depression, `1` = Depression Present)
@@ -50,40 +52,42 @@ The objective of this project is to develop and systematically evaluate **five s
 
 ---
 
-## 3. GitHub Repository Link `[1 Mark]`
+## 3. GitHub Repository Link 
 
-- **GitHub Repository URL:** `https://github.com/<your-username>/student-depression-ml-assignment2`
+- **GitHub Repository URL:** [https://github.com/bhoomikakodi/student-mental-health-classifier](https://github.com/bhoomikakodi/student-mental-health-classifier)
 - **Live Streamlit Cloud URL:** `https://student-depression-ml-assignment2.streamlit.app`
 
 *(Note: Replace placeholders with your final published repository and app URLs before creating your submission PDF).*
 
 ---
 
-## 4. Models Used & Performance Comparison Table `[5 Marks]`
+## 4. Models Used & Performance Comparison Table 
 
-All 5 classifiers were evaluated on the identical unseen test set (**5,581 stratified test instances**, 20% holdout split) across all six mandatory evaluation metrics:
+All 5 classifiers were evaluated on the identical unseen test set (**5,581 stratified test instances**, 20% holdout split) across all six mandatory evaluation metrics (KNN = K-Nearest Neighbors, Naive Bayes = Gaussian NB):
 
-| ML Model Name | Accuracy | AUC (ROC) | Precision | Recall | F1 Score | MCC Score |
+| ML Model Name | Accuracy | AUC | Precision | Recall | F1 | MCC |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
 | **Logistic Regression** | **0.8436** | **0.9184** | **0.8576** | **0.8788** | **0.8681** | **0.6764** |
 | **Decision Tree** | 0.8316 | 0.8991 | 0.8481 | 0.8678 | 0.8578 | 0.6516 |
-| **KNN (K-Nearest Neighbors)** | 0.8316 | 0.9030 | 0.8284 | 0.8984 | 0.8620 | 0.6503 |
-| **Naive Bayes (Gaussian NB)** | 0.7748 | 0.9118 | 0.7291 | **0.9792** | 0.8358 | 0.5591 |
-| **Support Vector Machine (SVM)** | **0.8438** | **0.9157** | **0.8568** | **0.8804** | **0.8684** | **0.6766** |
+| **KNN** | 0.8316 | 0.9030 | 0.8284 | 0.8984 | 0.8620 | 0.6503 |
+| **Naive Bayes** | 0.7748 | 0.9118 | 0.7291 | **0.9792** | 0.8358 | 0.5591 |
+| **Support Vector Machine** | **0.8438** | **0.9157** | **0.8568** | **0.8804** | **0.8684** | **0.6766** |
 
 ---
 
-## 5. Observations on Model Performance `[3 Marks]`
+## 5. Observations on Model Performance 
 
 | ML Model Name | Observation about model performance |
 | :--- | :--- |
 | **Logistic Regression** | Achieves the highest ROC-AUC score (**0.9184**) and near-peak accuracy (**84.36%**). By leveraging standardized continuous features and one-hot encoded categories, the linear decision boundary efficiently separates high-risk vs low-risk profiles without overfitting. |
-| **Decision Tree** | Delivers strong interpretability with **83.16% accuracy** and **0.8578 F1 score**. Pruning to a maximum depth of 7 effectively identified primary hierarchical split points (`Academic Pressure > 3.5`, `Suicidal Thoughts == Yes`), preventing deep-tree variance. |
+| **Decision Tree** | Delivers strong interpretability with **83.16% accuracy** and **0.8578 F1 score**. Limiting the tree to a maximum depth of 7 (minimum 10 samples per leaf) keeps variance in check; its top-level splits are on `Have you ever had suicidal thoughts ?`, then `Academic Pressure` and `Financial Stress`, matching the strongest risk indicators. |
 | **KNN** | Yields **83.16% accuracy** and **89.84% recall**. Distance-weighted voting across standardized feature space successfully clusters students with analogous academic stress and sleep deprivation patterns. |
 | **Naive Bayes** | Demonstrates the highest recall (**97.92%**) and a solid ROC-AUC (**0.9118**), effectively acting as a high-sensitivity screening filter. However, precision (**72.91%**) is slightly degraded due to its feature independence assumption across correlated metrics (e.g., Academic Pressure and Study Satisfaction). |
 | **Support Vector Machine** | Achieves the top overall accuracy (**84.38%**), highest F1 score (**0.8684**), and highest Matthews Correlation Coefficient (**0.6766**). The Radial Basis Function (RBF) kernel accurately constructs a non-linear margin that accommodates subtle feature interactions. |
 
-### Overall Winner for Your Dataset:
+---
+
+## 6. Overall Winner for Your Dataset
 
 > **🏆 Winner: Support Vector Machine (SVM) / Logistic Regression**
 > 
@@ -94,15 +98,55 @@ All 5 classifiers were evaluated on the identical unseen test set (**5,581 strat
 
 ---
 
-## 6. Repository Structure
+## 7. Execution Instructions
+
+### A. Local Setup & Training
+```bash
+# 1. Clone repository
+git clone https://github.com/bhoomikakodi/student-mental-health-classifier.git
+cd student-mental-health-classifier
+
+# 2. Create virtual environment
+python3 -m venv venv
+source venv/bin/activate  # On Windows (cmd): venv\Scripts\activate | PowerShell: venv\Scripts\Activate.ps1
+
+# 3. Install dependencies (always install from requirements.txt inside the venv)
+pip install -r requirements.txt
+#    (Notebook users: register the venv as a kernel and select it in Jupyter/VS Code)
+#    pip install ipykernel && python -m ipykernel install --user --name student-mental-health-venv
+
+# 4. Train all models and export artifacts
+python src/train.py
+
+# 5. Launch interactive Streamlit application
+streamlit run app.py
+```
+
+**One-step alternative:** run all of steps 2–5 above with a helper script from the project root. Each script creates the `venv` (if missing), activates it, installs `requirements.txt`, registers the Jupyter kernel, trains the models and launches the app:
+- **macOS / Linux / Git Bash / WSL:** `./run.sh` (auto-detects `venv/bin/activate` or `venv/Scripts/activate`)
+- **Windows `cmd` / PowerShell:** `run.bat` (uses `venv\Scripts\activate`; in PowerShell use `.\run.bat`)
+
+**Running the notebook:** open `notebooks/student_depression_analysis.ipynb` and select the **Python (student-mental-health venv)** kernel (or `venv/bin/python`). Its first cell runs `%pip install -r ../requirements.txt` inside that venv.
+
+### B. Deployment to Streamlit Community Cloud
+1. Push this repository to GitHub.
+2. Navigate to [share.streamlit.io](https://share.streamlit.io).
+3. Connect your GitHub account and click **"New App"**.
+4. Select the repository, set branch to `main`, and main file path to `app.py`.
+5. Click **Deploy**.
+
+---
+
+## 8. Repository Structure
 
 ```text
-student-depression-ml-assignment2/
+student-mental-health-classifier/
 │
 ├── app.py                      # Interactive Streamlit Web Application
 ├── requirements.txt            # Reproducible python dependencies
+├── run.sh                      # One-step setup & launch (macOS/Linux/Git Bash/WSL)
+├── run.bat                     # One-step setup & launch (Windows cmd/PowerShell)
 ├── README.md                   # Full assignment documentation & analysis
-├── test_data.csv               # 5,581 sample holdout test set with ground truth
 ├── Assignment2.md              # Assignment specification & marking rubric
 │
 ├── Datasets/
@@ -129,54 +173,13 @@ student-depression-ml-assignment2/
 
 ---
 
-## 7. Streamlit Web Application Features
+## 9. Streamlit Web Application Features
 
 The deployed Streamlit application includes all mandatory and bonus features:
-- **a. Test Dataset Upload (CSV):** Allows users to upload their own test CSV or defaults to the included `test_data.csv` (5,581 samples).
+- **a. Test Dataset Upload (CSV):** Allows users to upload their own test CSV or defaults to the included `Datasets/test_data.csv` (5,581 samples).
 - **b. Model Selection Dropdown:** Seamless switching between all 5 classifiers or a consolidated "Compare All 5 Models" mode.
 - **c. Evaluation Metrics Dashboard:** Displays Accuracy, ROC-AUC, Precision, Recall, F1, and MCC via modern KPI cards.
 - **d. Visual Confusion Matrix & ROC Curves:** Interactive Plotly heatmaps and combined ROC curves.
 - **e. Full Classification Report:** Detailed per-class precision, recall, and support breakdown.
 - **f. Interactive Risk Simulator:** Real-time single-student profile assessment using form inputs and what-if sliders.
-
----
-
-## 8. Execution Instructions (BITS Virtual Lab & Local)
-
-### A. Local Setup & Training
-```bash
-# 1. Clone repository
-git clone https://github.com/<your-username>/student-depression-ml-assignment2.git
-cd student-depression-ml-assignment2
-
-# 2. Create virtual environment
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# 3. Install dependencies
-pip install -r requirements.txt
-
-# 4. Train all models and export artifacts
-python src/train.py
-
-# 5. Launch interactive Streamlit application
-streamlit run app.py
-```
-
-### B. Deployment to Streamlit Community Cloud
-1. Push this repository to GitHub.
-2. Navigate to [share.streamlit.io](https://share.streamlit.io).
-3. Connect your GitHub account and click **"New App"**.
-4. Select the repository, set branch to `main`, and main file path to `app.py`.
-5. Click **Deploy**.
-
----
-
-## 9. Submission Checklist
-
-- [x] Dataset meets criteria ($\ge 12$ features, $\ge 500$ instances — actual: 16 features, 27,901 rows).
-- [x] All 5 classification algorithms trained, saved, and evaluated.
-- [x] All 6 evaluation metrics computed and compared (Accuracy, AUC, Precision, Recall, F1, MCC).
-- [x] Streamlit app (`app.py`) loads models without retraining and supports test CSV upload.
-- [x] Clean folder structure with `model/`, `test_data.csv`, `requirements.txt`, `src/`, `notebooks/`.
-- [x] Markdown documentation and comparison tables strictly follow grading guidelines.
+- **g. Dataset Downloads:** Sidebar buttons to download `test_data.csv` and the full `Student_Depression_Dataset.csv`.
